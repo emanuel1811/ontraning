@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B7285">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>OnTraining Floripa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: coluna única estilo app de celular — cabeçalho com data e contagem, abas Hoje/Histórico, cartões de treino e refeições */
+:root{
+  --bg:#EEF3F4; --surface:#FFFFFF; --ink:#0F1E24; --muted:#5A6D74; --line:#D6E0E3;
+  --accent:#0B7285; --accent-ink:#FFFFFF; --accent-soft:#DDEFF2;
+  --good:#2F7D46; --good-soft:#E0F1E5; --warn:#9A6414; --warn-soft:#F7ECD8;
+  --f-display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0A1215; --surface:#111C20; --ink:#E4EDEF; --muted:#8FA3A9; --line:#223239;
+  --accent:#3FB4C5; --accent-ink:#05262B; --accent-soft:#12303A;
+  --good:#63C483; --good-soft:#15301F; --warn:#E2B25C; --warn-soft:#33270F; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0A1215; --surface:#111C20; --ink:#E4EDEF; --muted:#8FA3A9; --line:#223239;
+  --accent:#3FB4C5; --accent-ink:#05262B; --accent-soft:#12303A;
+  --good:#63C483; --good-soft:#15301F; --warn:#E2B25C; --warn-soft:#33270F; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;padding-inline:16px;padding-block:14px 48px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1,h2,h3{margin:0;text-wrap:balance}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.date{font-family:var(--f-display);font-weight:700;font-size:2.4rem;line-height:.95;letter-spacing:.01em;text-transform:uppercase}
+.date small{display:block;font-family:var(--f-body);font-size:.8rem;font-weight:600;color:var(--muted);letter-spacing:.08em;margin-bottom:4px}
+.trip{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:.85rem;display:flex;align-items:center;gap:6px}
+.trip b{font-family:var(--f-mono);font-size:.95rem;color:var(--accent)}
+
+.tabs{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+.tabs button{flex:1;border:0;background:transparent;padding:9px;border-radius:9px;font-weight:600;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.wtitle{font-family:var(--f-display);font-weight:700;font-size:1.9rem;line-height:1;text-transform:uppercase}
+.wfoco{color:var(--muted);font-size:.9rem}
+.why{background:var(--accent-soft);border-radius:10px;padding:10px 12px;font-size:.88rem}
+.note{background:var(--warn-soft);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:.88rem}
+.note b{color:var(--warn)}
+
+.ex{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding-block:10px;border-top:1px solid var(--line);align-items:center}
+.ex:first-child{border-top:0}
+.ex .n{font-weight:600;min-width:0}
+.ex .s{font-family:var(--f-mono);font-size:.85rem;color:var(--accent);white-space:nowrap}
+.ex .load{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted)}
+.ex .load input{width:76px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-family:var(--f-mono);font-size:.85rem}
+.exlist{display:flex;flex-direction:column}
+
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 14px;font-weight:600}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.grow{flex:1}
+.btn:disabled{opacity:.5;cursor:default}
+.status{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:700;padding:4px 10px;border-radius:999px}
+.status.done{background:var(--good-soft);color:var(--good)}
+.status.skip{background:var(--warn-soft);color:var(--warn)}
+.status.todo{background:var(--accent-soft);color:var(--accent)}
+
+.macros{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.macro{display:flex;flex-direction:column;gap:4px}
+.macro span{font-size:.72rem;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.macro b{font-family:var(--f-mono);font-size:.95rem}
+.bar{height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+
+.meal{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;padding-block:12px;border-top:1px solid var(--line)}
+.meal:first-of-type{border-top:0}
+.chk{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);background:transparent;display:grid;place-items:center;padding:0;margin-top:2px}
+.chk[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:var(--surface)}
+.chk svg{width:14px;height:14px}
+.meal .slot{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.meal .desc{font-weight:500;min-width:0}
+.meal .mm{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);margin-top:2px}
+.swap{border:0;background:transparent;color:var(--accent);font-size:.82rem;font-weight:600;padding:4px 2px}
+.meal.eaten .desc{color:var(--muted)}
+
+.weight{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.weight input{width:96px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-family:var(--f-mono)}
+.weight .avg{font-size:.85rem;color:var(--muted)}
+
+.hist{display:flex;flex-direction:column}
+.hrow{display:grid;grid-template-columns:62px 1fr auto;gap:10px;padding-block:11px;border-top:1px solid var(--line);align-items:center}
+.hrow:first-child{border-top:0}
+.hrow .d{font-family:var(--f-display);font-weight:700;font-size:1.15rem;line-height:1;text-transform:uppercase}
+.hrow .d small{display:block;font-family:var(--f-body);font-size:.7rem;color:var(--muted);font-weight:600;margin-top:3px}
+.hrow .w{font-weight:600;min-width:0}
+.hrow .m{font-size:.8rem;color:var(--muted)}
+.empty{color:var(--muted);font-size:.9rem;padding:8px 0}
+.settings{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.9rem}
+.settings input{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.foot{font-size:.78rem;color:var(--muted);text-align:center}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;font-size:.9rem;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1 class="date" id="date"><small id="dow">HOJE</small><span id="dateMain">—</span></h1>
+    <div class="trip" id="trip">Viagem: <b id="tripDays">defina a data</b></div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tabHoje" aria-selected="true">Hoje</button>
+    <button role="tab" id="tabHist" aria-selected="false">Histórico</button>
+  </div>
+
+  <main id="viewHoje" class="wrap" style="gap:14px"></main>
+  <main id="viewHist" class="wrap" style="gap:14px" hidden></main>
+
+  <p class="foot" id="storeInfo">Carregando…</p>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ============ DADOS: TREINOS ============ */
+const TREINOS = {
+  supA:{nome:"Superior A",foco:"Peito, costas e ombro",tipo:"forca",ex:[
+    [["Supino reto com barra","Supino reto com halter"],"4×8–10"],
+    [["Remada curvada com barra","Remada baixa na polia"],"4×8–10"],
+    [["Supino inclinado com halter","Supino inclinado na máquina"],"3×10–12"],
+    [["Puxada frontal aberta","Puxada frontal pegada neutra"],"3×10–12"],
+    [["Elevação lateral com halter","Elevação lateral na polia"],"3×12–15"],
+    [["Tríceps na polia com corda","Tríceps francês com halter"],"3×12–15"]]},
+  infA:{nome:"Inferior A",foco:"Quadríceps e glúteo",tipo:"forca",ex:[
+    [["Agachamento livre","Agachamento no smith"],"4×8–10"],
+    [["Leg press 45°","Hack squat"],"3×10–12"],
+    [["Afundo com halter","Agachamento búlgaro"],"3×10 cada perna"],
+    [["Cadeira extensora","Cadeira extensora unilateral"],"3×12–15"],
+    [["Panturrilha em pé","Panturrilha no leg press"],"4×12–15"]]},
+  cardio:{nome:"Intervalado + abdômen",foco:"Cardio intenso e core",tipo:"cardio",ex:[
+    [["Intervalado na bike","Intervalado na esteira"],"20–30 min · 30s forte / 90s leve",1],
+    [["Prancha"],"3×40–60 s",1],
+    [["Elevação de pernas","Abdominal infra no banco"],"3×12–15",1],
+    [["Abdominal na polia","Crunch no solo"],"3×15"],
+    [["Prancha lateral"],"2×30 s cada lado",1]]},
+  supB:{nome:"Superior B",foco:"Costas, ombro e braço",tipo:"forca",ex:[
+    [["Barra fixa pegada fechada","Puxada pegada fechada"],"4×8–10"],
+    [["Desenvolvimento com halter","Desenvolvimento na máquina"],"3×8–10"],
+    [["Remada unilateral com halter","Remada cavalinho"],"3×10–12"],
+    [["Crucifixo com halter","Peck deck"],"3×12–15"],
+    [["Rosca direta com barra","Rosca alternada com halter"],"3×10–12"],
+    [["Elevação lateral com halter","Elevação lateral na polia"],"3×12–15"]]},
+  infB:{nome:"Inferior B",foco:"Posterior, glúteo e abdômen",tipo:"forca",ex:[
+    [["Levantamento terra romeno com barra","Terra romeno com halter"],"4×8–10"],
+    [["Elevação pélvica com barra","Elevação pélvica na máquina"],"4×10–12"],
+    [["Mesa flexora","Cadeira flexora"],"3×12"],
+    [["Cadeira abdutora"],"3×15"],
+    [["Panturrilha sentado"],"3×15"],
+    [["Prancha"],"3×45 s",1],
+    [["Abdominal na polia","Crunch no solo"],"3×15"]]},
+  longo:{nome:"Cardio longo",foco:"Queima de gordura em ritmo leve",tipo:"cardio",ex:[
+    [["Caminhada inclinada na esteira","Bike ergométrica","Corrida leve ao ar livre"],"40–60 min leve a moderado",1],
+    [["Alongamento geral"],"10 min",1]]},
+  descanso:{nome:"Descanso",foco:"Recuperação ativa",tipo:"descanso",ex:[
+    [["Caminhada leve"],"8–10 mil passos no dia",1],
+    [["Mobilidade de quadril e ombro"],"10 min",1]]}
+};
+const ROTACAO = ["supA","infA","cardio","supB","infB","longo","descanso"];
+
+/* ============ DADOS: REFEIÇÕES (low carb, sem glúten, só gordura animal) ============ */
+/* [id, descrição, kcal, proteína, gordura, carbo] */
+const REFEICOES = {
+  cafe:{nome:"Café da manhã",op:[
+    ["c1","5 ovos mexidos na manteiga (10 g) + 40 g de queijo muçarela",520,37,40,3],
+    ["c2","Omelete de 4 ovos com 80 g de presunto e 30 g de muçarela",480,42,33,3],
+    ["c3","3 ovos fritos na banha + 40 g de bacon",500,30,41,2],
+    ["c4","Crepioca (2 ovos + 20 g de goma de tapioca) com 50 g de queijo minas",430,25,24,20],
+    ["c5","4 ovos mexidos com 80 g de frango desfiado na manteiga",440,48,26,2]]},
+  almoco:{nome:"Almoço",op:[
+    ["a1","200 g de picanha + 200 g de legumes (brócolis, abobrinha, vagem)",620,48,44,12],
+    ["a2","200 g de sobrecoxa assada com pele + salada verde + abobrinha",560,46,38,10],
+    ["a3","200 g de carne moída (acém) com abobrinha refogada na manteiga",540,46,36,10],
+    ["a4","180 g de fraldinha + couve refogada na banha + 100 g de abóbora",600,44,40,16],
+    ["a5","200 g de lombo suíno + brócolis na manteiga",520,50,32,8]]},
+  pre:{nome:"Pré-treino",treino:true,op:[
+    ["p1","1 dose de whey + 1 banana",230,25,2,28],
+    ["p2","150 g de iogurte grego integral + 1 banana",260,14,9,30],
+    ["p3","2 ovos cozidos + 100 g de batata-doce",230,13,10,20],
+    ["p4","1 dose de whey + 150 g de mamão",200,25,2,18]]},
+  jantar:{nome:"Jantar",op:[
+    ["j1","250 g de salmão na manteiga (10 g) + salada",620,50,44,5],
+    ["j2","250 g de tilápia na manteiga + legumes",430,52,20,10],
+    ["j3","200 g de alcatra + 1 ovo frito + salada",560,52,36,5],
+    ["j4","200 g de sardinha assada + legumes",450,48,26,8],
+    ["j5","2 hambúrgueres caseiros (100 g cada) com queijo, sem pão, + salada",620,50,45,4]]},
+  ceia:{nome:"Ceia",op:[
+    ["e1","150 g de iogurte grego integral + 100 g de morangos",230,14,12,14],
+    ["e2","50 g de queijo + 2 fatias de presunto",230,18,17,1],
+    ["e3","1 dose de whey com 200 ml de leite integral",250,31,7,12],
+    ["e4","2 ovos cozidos + 30 g de queijo",250,19,18,1]]}
+};
+const SLOTS = ["cafe","almoco","pre","jantar","ceia"];
+const META = {kcal:2350,p:155,g:145,c:65};
+const JANELA_REPETICAO = 3; // dias sem repetir a mesma refeição
+
+/* ============ UTIL ============ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const iso = d => { const z = new Date(d.getTime()-d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); };
+const fromIso = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+const daysBetween = (a,b) => Math.round((fromIso(b)-fromIso(a))/86400000);
+const HOJE = iso(new Date());
+const DOW = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+const MES = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+const fmtCurta = s => { const d=fromIso(s); return `${d.getDate()} ${MES[d.getMonth()]}`; };
+function hash(str){let h=2166136261;for(const ch of str){h^=ch.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
+function findMeal(slot,id){return REFEICOES[slot].op.find(o=>o[0]===id);}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),1800);}
+
+/* ============ ARMAZENAMENTO (db do Claude, ou localStorage fora dele) ============ */
+const store = {
+  mode:"local", db:null,
+  async init(onChange){
+    try{
+      const db = window.claude?.use ? await window.claude.use("db") : null;
+      if(db){
+        this.db=db; this.mode="db";
+        db.collection("dias").orderBy("date","desc").limit(120).onSnapshot(snap=>{
+          const dias={}; snap.docs.forEach(d=>{dias[d.id]=d.data();}); state.dias=dias; onChange();
+        },()=>{});
+        db.doc("config/app").onSnapshot(s=>{ state.config = s.exists ? {...s.data()} : {}; onChange(); },()=>{});
+        return;
+      }
+    }catch(e){}
+    this.mode="local";
+    try{ state.dias = JSON.parse(localStorage.getItem("ont_dias")||"{}"); state.config = JSON.parse(localStorage.getItem("ont_cfg")||"{}"); }catch(e){}
+    onChange();
+  },
+  _q:Promise.resolve(),
+  saveDia(dia){
+    state.dias[dia.date]=dia;
+    if(this.mode==="db"){ this._q=this._q.then(()=>this.db.doc("dias/"+dia.date).set(dia)).catch(()=>toast("Não consegui salvar. Tente de novo.")); }
+    else { try{localStorage.setItem("ont_dias",JSON.stringify(state.dias));}catch(e){} }
+  },
+  saveConfig(cfg){
+    state.config=cfg;
+    if(this.mode==="db"){ this._q=this._q.then(()=>this.db.doc("config/app").set(cfg)).catch(()=>toast("Não consegui salvar.")); }
+    else { try{localStorage.setItem("ont_cfg",JSON.stringify(cfg));}catch(e){} }
+  }
+};
+
+/* ============ ESTADO ============ */
+const state = { dias:{}, config:{}, tab:"hoje", draft:{cargas:{}}, rerolls:{}, treinoOverride:null };
+
+/* ============ MOTOR DE RECOMENDAÇÃO ============ */
+function diasAnteriores(){ return Object.values(state.dias).filter(d=>d.date<HOJE).sort((a,b)=>b.date.localeCompare(a.date)); }
+
+function recomendarTreino(){
+  const prev = diasAnteriores();
+  const ultimoFeito = prev.find(d=>d.treino?.status==="feito");
+  let id, motivo;
+  if(!ultimoFeito){ id="supA"; motivo="Primeiro treino registrado: começando pela rotação do início."; }
+  else{
+    const idx = ROTACAO.indexOf(ultimoFeito.treino.id);
+    id = ROTACAO[(idx+1)%ROTACAO.length];
+    const gap = daysBetween(ultimoFeito.date,HOJE);
+    motivo = `Último treino concluído: ${TREINOS[ultimoFeito.treino.id].nome} (${gap===1?"ontem":`há ${gap} dias`}). Próximo da sequência: ${TREINOS[id].nome}.`;
+    // 6 treinos seguidos sem descanso → força descanso
+    let seguidos=0; for(const d of prev){ if(d.treino?.status==="feito" && d.treino.id!=="descanso") seguidos++; else break; }
+    if(seguidos>=6 && id!=="descanso"){ id="descanso"; motivo="Você treinou 6 dias seguidos. Hoje é descanso para o corpo recuperar."; }
+    // voltou depois de 3+ dias parado e hoje seria descanso → treina
+    if(gap>=3 && id==="descanso"){ id="supA"; motivo=`Você está há ${gap} dias sem treinar, então o descanso fica para depois. Volte pelo Superior A.`; }
+  }
+  return {id,motivo};
+}
+
+function variante(id){ // alterna exercícios a cada vez que o treino é concluído
+  return diasAnteriores().filter(d=>d.treino?.status==="feito"&&d.treino.id===id).length;
+}
+
+function ultimasCargas(id){
+  const prev = diasAnteriores().find(d=>d.treino?.status==="feito"&&d.treino.id===id&&d.treino.cargas);
+  return prev ? prev.treino : null;
+}
+
+function comidasRecentes(){
+  const set=new Set();
+  diasAnteriores().filter(d=>daysBetween(d.date,HOJE)<=JANELA_REPETICAO).forEach(d=>{
+    Object.values(d.refeicoes||{}).forEach(r=>{ if(r.feito) set.add(r.id); });
+  });
+  return set;
+}
+
+function recomendarRefeicao(slot){
+  const ops = REFEICOES[slot].op, recentes = comidasRecentes();
+  let elig = ops.filter(o=>!recentes.has(o[0])); if(!elig.length) elig=ops;
+  const base = hash(HOJE+slot) % elig.length;
+  const k = state.rerolls[slot]||0;
+  return elig[(base+k)%elig.length][0];
+}
+
+function avisos(){
+  const out=[];
+  const viagem = state.config.viagem;
+  if(viagem){ const f=daysBetween(HOJE,viagem); if(f>=0&&f<=4) out.push("<b>Semana da viagem:</b> faça 1 série a menos em cada exercício para chegar descansado. Mantenha o sal normal e evite álcool."); }
+  const pesos = Object.values(state.dias).filter(d=>d.peso).sort((a,b)=>a.date.localeCompare(b.date));
+  const media = arr => arr.reduce((s,d)=>s+d.peso,0)/arr.length;
+  const ult = pesos.filter(d=>daysBetween(d.date,HOJE)<7), ant = pesos.filter(d=>{const g=daysBetween(d.date,HOJE);return g>=7&&g<14;});
+  if(ult.length>=3&&ant.length>=3){
+    const dif = media(ult)-media(ant);
+    if(dif>-0.2) out.push(`<b>Peso parado:</b> a média da semana mudou ${dif.toFixed(1)} kg. Se continuar assim, tire uns 10 g de manteiga ou 40 g de queijo por dia.`);
+    else if(dif<-1.1) out.push(`<b>Caindo rápido:</b> ${dif.toFixed(1)} kg na semana. Se a força estiver caindo, some 20–30 g de carboidrato antes do treino.`);
+  }
+  return out;
+}
+
+/* ============ PLANO DE HOJE ============ */
+function planoHoje(){
+  const salvo = state.dias[HOJE];
+  const rec = recomendarTreino();
+  const treinoId = state.treinoOverride || salvo?.treino?.id || rec.id;
+  const tipo = TREINOS[treinoId].tipo;
+  const refeicoes = {};
+  for(const slot of SLOTS){
+    if(REFEICOES[slot].treino && tipo==="descanso") continue;
+    const s = salvo?.refeicoes?.[slot];
+    refeicoes[slot] = (s && !state.rerolls[slot]) ? {...s} : {id:recomendarRefeicao(slot),feito:!!s?.feito};
+  }
+  return {treinoId, motivo: (salvo?.treino?.id && !state.treinoOverride) ? null : (state.treinoOverride ? "Você trocou o treino de hoje." : rec.motivo),
+          status: (salvo?.treino?.id===treinoId) ? salvo.treino.status||null : null,
+          refeicoes, peso: salvo?.peso ?? null};
+}
+
+function montarDia(plano, patch={}){
+  const salvo = state.dias[HOJE] || {};
+  const cargas = {...(salvo.treino?.cargas||{}), ...state.draft.cargas};
+  return {
+    date:HOJE,
+    treino:{id:plano.treinoId, nome:TREINOS[plano.treinoId].nome, variante:variante(plano.treinoId), status:plano.status, cargas},
+    refeicoes:plano.refeicoes, peso:plano.peso, atualizado:new Date().toISOString(), ...patch
+  };
+}
+
+/* ============ RENDER ============ */
+const CHECK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
+
+function renderHeader(){
+  const d=new Date();
+  $("#dow").textContent = DOW[d.getDay()];
+  $("#dateMain").textContent = `${d.getDate()} ${MES[d.getMonth()]}`;
+  const v=state.config.viagem;
+  if(v){ const f=daysBetween(HOJE,v); $("#tripDays").textContent = f>0?`${f} dias`:f===0?"é hoje!":"já foi"; }
+  else $("#tripDays").textContent="defina a data";
+}
+
+function renderHoje(){
+  const p = planoHoje(), t = TREINOS[p.treinoId], v = variante(p.treinoId), ult = ultimasCargas(p.treinoId);
+  const statusChip = p.status==="feito"?'<span class="status done">Treino feito</span>':p.status==="pulado"?'<span class="status skip">Pulado</span>':'<span class="status todo">A fazer</span>';
+  const exs = t.ex.map((e,i)=>{
+    const nomes=e[0], nome=nomes[v%nomes.length], semCarga=e[2];
+    const ant = ult?.cargas?.[i];
+    const val = state.draft.cargas[i] ?? state.dias[HOJE]?.treino?.cargas?.[i] ?? "";
+    return `<div class="ex"><div class="n">${esc(nome)}</div><div class="s">${esc(e[1])}</div>
+      ${semCarga||t.tipo!=="forca"?"":`<label class="load" for="kg${i}">Carga <input id="kg${i}" data-i="${i}" inputmode="decimal" placeholder="${ant?esc(ant):"kg"}" value="${esc(val)}"> kg ${ant?`<span>· última vez: <b class="num">${esc(ant)} kg</b></span>`:""}</label>`}</div>`;
+  }).join("");
+
+  const tot={kcal:0,p:0,g:0,c:0};
+  const meals = Object.entries(p.refeicoes).map(([slot,r])=>{
+    const m=findMeal(slot,r.id); tot.kcal+=m[2];tot.p+=m[3];tot.g+=m[4];tot.c+=m[5];
+    return `<div class="meal ${r.feito?"eaten":""}">
+      <button class="chk" data-meal="${slot}" aria-pressed="${!!r.feito}" aria-label="Marcar ${REFEICOES[slot].nome} como feita">${r.feito?CHECK:""}</button>
+      <div style="min-width:0"><div class="slot">${REFEICOES[slot].nome}</div><div class="desc">${esc(m[1])}</div>
+      <div class="mm">${m[2]} kcal · P ${m[3]} g · G ${m[4]} g · C ${m[5]} g</div></div>
+      ${r.feito?"":`<button class="swap" data-swap="${slot}">Trocar</button>`}</div>`;
+  }).join("");
+  const mb=(lab,val,meta,un)=>`<div class="macro"><span>${lab}</span><b>${val}${un}</b><div class="bar"><i style="width:${Math.min(100,val/meta*100)}%"></i></div></div>`;
+
+  const pesos = Object.values(state.dias).filter(d=>d.peso&&daysBetween(d.date,HOJE)<7);
+  const media = pesos.length? (pesos.reduce((s,d)=>s+d.peso,0)/pesos.length).toFixed(1):null;
+  const av = avisos().map(a=>`<div class="note">${a}</div>`).join("");
+
+  $("#viewHoje").innerHTML = `
+    ${av}
+    <section class="card" aria-labelledby="tTreino">
+      <div class="row" style="justify-content:space-between;align-items:center"><span class="eyebrow">Treino de hoje</span>${statusChip}</div>
+      <div><h2 class="wtitle" id="tTreino">${t.nome}</h2><div class="wfoco">${t.foco}${t.tipo==="forca"?` · variação ${v%2===0?"A":"B"}`:""}</div></div>
+      ${p.motivo?`<div class="why">${esc(p.motivo)}</div>`:""}
+      <div class="exlist">${exs}</div>
+      ${t.tipo==="forca"?`<div class="wfoco" style="font-size:.82rem">Descanso de 60–90 s. Termine cada série com 1–2 repetições sobrando. Tente superar a carga ou as repetições da última vez.</div>`:""}
+      <div class="row">
+        <button class="btn primary grow" id="btnFeito">${p.status==="feito"?"Treino salvo ✓":"Treinei"}</button>
+        <button class="btn" id="btnPulei">Pulei</button>
+        <button class="btn" id="btnTrocar">Trocar treino</button>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="tRef">
+      <div class="row" style="justify-content:space-between;align-items:center"><h2 class="eyebrow" id="tRef">Refeições de hoje</h2>
+        <span class="eyebrow">${Object.values(p.refeicoes).filter(r=>r.feito).length}/${Object.keys(p.refeicoes).length} feitas</span></div>
+      <div class="macros">${mb("kcal",tot.kcal,META.kcal,"")}${mb("Prot",tot.p,META.p," g")}${mb("Gord",tot.g,META.g," g")}${mb("Carb",tot.c,META.c," g")}</div>
+      <div>${meals}</div>
+      <div class="wfoco" style="font-size:.82rem">Low carb, sem glúten, gordura só animal. Refeições que você marcou nos últimos ${JANELA_REPETICAO} dias não se repetem. ${t.tipo==="descanso"?"Dia de descanso: sem pré-treino.":""} Meta: ~${META.kcal} kcal e ${META.p} g de proteína.</div>
+    </section>
+
+    <section class="card" aria-labelledby="tPeso">
+      <h2 class="eyebrow" id="tPeso">Peso de hoje (em jejum)</h2>
+      <div class="weight"><input id="peso" inputmode="decimal" placeholder="80.0" value="${p.peso??""}"> <span>kg</span>
+        <button class="btn" id="btnPeso">Salvar peso</button>
+        <span class="avg">${media?`Média 7 dias: <b class="num">${media} kg</b>`:"Pese 3–4 vezes por semana"}</span></div>
+    </section>
+
+    <section class="card">
+      <h2 class="eyebrow">Data da viagem</h2>
+      <div class="settings"><input type="date" id="viagem" value="${state.config.viagem||""}"><button class="btn" id="btnViagem">Salvar</button></div>
+    </section>`;
+  bindHoje(p);
+}
+
+function bindHoje(p){
+  document.querySelectorAll(".ex input").forEach(inp=>inp.addEventListener("input",e=>{ state.draft.cargas[e.target.dataset.i]=e.target.value.replace(",","."); }));
+  $("#btnFeito").onclick=()=>{ p.status="feito"; commit(p); toast("Treino registrado"); };
+  $("#btnPulei").onclick=()=>{ p.status="pulado"; commit(p); toast("Marcado como pulado. Amanhã ele volta."); };
+  $("#btnTrocar").onclick=()=>{
+    const i=ROTACAO.indexOf(p.treinoId); state.treinoOverride=ROTACAO[(i+1)%ROTACAO.length];
+    if(state.dias[HOJE]?.treino) commit({...planoHoje(),status:null}); else render();
+  };
+  document.querySelectorAll("[data-meal]").forEach(b=>b.onclick=()=>{
+    const s=b.dataset.meal; p.refeicoes[s].feito=!p.refeicoes[s].feito; commit(p);
+  });
+  document.querySelectorAll("[data-swap]").forEach(b=>b.onclick=()=>{
+    const s=b.dataset.swap; state.rerolls[s]=(state.rerolls[s]||0)+1; render();
+  });
+  $("#btnPeso").onclick=()=>{ const v=parseFloat($("#peso").value.replace(",",".")); if(!(v>30&&v<250)){toast("Digite o peso em kg, ex.: 79.4");return;} p.peso=v; commit(p); toast("Peso salvo"); };
+  $("#btnViagem").onclick=()=>{ const v=$("#viagem").value; if(!v){toast("Escolha uma data");return;} store.saveConfig({...state.config,viagem:v}); render(); toast("Data da viagem salva"); };
+}
+
+function commit(p){
+  const dia = montarDia(p);
+  state.rerolls={}; state.treinoOverride=null; state.draft.cargas={};
+  store.saveDia(dia); render();
+}
+
+function renderHist(){
+  const dias = Object.values(state.dias).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,30);
+  const feitos = dias.filter(d=>d.treino?.status==="feito"&&daysBetween(d.date,HOJE)<7).length;
+  const rows = dias.map(d=>{
+    const dt=fromIso(d.date), refs=Object.values(d.refeicoes||{}), rf=refs.filter(r=>r.feito).length;
+    const st=d.treino?.status==="feito"?'<span class="status done">Feito</span>':d.treino?.status==="pulado"?'<span class="status skip">Pulado</span>':'<span class="status todo">—</span>';
+    return `<div class="hrow"><div class="d">${dt.getDate()} ${MES[dt.getMonth()]}<small>${DOW[dt.getDay()].slice(0,3)}</small></div>
+      <div style="min-width:0"><div class="w">${esc(d.treino?.nome||"Sem treino")}</div><div class="m">${rf}/${refs.length} refeições${d.peso?` · <span class="num">${d.peso} kg</span>`:""}</div></div>${st}</div>`;
+  }).join("");
+  $("#viewHist").innerHTML = `<section class="card">
+    <div class="row" style="justify-content:space-between"><h2 class="eyebrow">Últimos dias</h2><span class="eyebrow">${feitos} treinos nos últimos 7 dias</span></div>
+    <div class="hist">${rows||'<p class="empty">Nada registrado ainda. Marque o treino ou uma refeição na aba Hoje e o dia aparece aqui.</p>'}</div></section>`;
+}
+
+function render(){
+  renderHeader();
+  if(state.tab==="hoje") renderHoje(); else renderHist();
+  $("#viewHoje").hidden = state.tab!=="hoje"; $("#viewHist").hidden = state.tab!=="hist";
+  $("#tabHoje").setAttribute("aria-selected",state.tab==="hoje"); $("#tabHist").setAttribute("aria-selected",state.tab==="hist");
+  $("#storeInfo").textContent = store.mode==="db" ? "Seus registros ficam salvos na sua conta e aparecem em qualquer aparelho." : "Registros salvos neste navegador.";
+}
+$("#tabHoje").onclick=()=>{state.tab="hoje";render();};
+$("#tabHist").onclick=()=>{state.tab="hist";render();};
+
+render();
+store.init(render);
+</script>
+
+</body>
+</html>
