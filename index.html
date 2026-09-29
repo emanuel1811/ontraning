@@ -151,6 +151,9 @@ header.top .tabs{order:3;flex:1 1 100%}
 .empty{color:var(--muted);font-size:.9rem;padding:8px 0}
 .settings{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.9rem}
 .settings input{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.saved{font-size:.8rem;color:var(--muted)}
+.saved svg{color:var(--good)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .foot{font-size:.78rem;color:var(--muted);text-align:center}
 
 /* Popup de execução */
@@ -565,12 +568,18 @@ const store = {
   saveDia(dia){
     state.dias[dia.date]=dia;
     if(this.mode==="db"){ this._q=this._q.then(()=>this.db.doc("dias/"+dia.date).set(dia)).catch(()=>toast("Não consegui salvar. Tente de novo.")); }
-    else { try{localStorage.setItem("ont_dias",JSON.stringify(state.dias));}catch(e){} }
+    else { this.gravar("ont_dias",state.dias); }
+  },
+  gravar(chave,valor){
+    try{ const txt=JSON.stringify(valor); localStorage.setItem(chave,txt);
+      if(localStorage.getItem(chave)!==txt) throw 0; this.salvoEm=new Date(); }
+    catch(e){ toast("O aparelho não deixou salvar. Veja o aviso no Histórico."); this.falhou=true; }
+    if(!this._pediu && navigator.storage?.persist){ this._pediu=true; navigator.storage.persist().catch(()=>{}); }
   },
   saveConfig(cfg){
     state.config=cfg;
     if(this.mode==="db"){ this._q=this._q.then(()=>this.db.doc("config/app").set(cfg)).catch(()=>toast("Não consegui salvar.")); }
-    else { try{localStorage.setItem("ont_cfg",JSON.stringify(cfg));}catch(e){} }
+    else { this.gravar("ont_cfg",cfg); }
   }
 };
 const state = { dias:{}, config:{}, tab:"hoje", draft:{cargas:{}}, rerolls:{}, treinoOverride:null };
@@ -646,6 +655,9 @@ function montarDia(p){
 
 /* ================= RENDER ================= */
 const CHECK='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
+const CHECK_MINI='<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
+const fmtData = iso => { const d=fromIso(iso); return `${d.getDate()} ${MES[d.getMonth()]} ${d.getFullYear()}`; };
+const ultimoPeso = () => Object.values(state.dias).filter(d=>d.peso&&d.date<HOJE).sort((a,b)=>b.date.localeCompare(a.date))[0];
 const PLAY='<svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.2v9.6a.6.6 0 0 0 .9.5l7.6-4.8a.6.6 0 0 0 0-1L5.9 2.7a.6.6 0 0 0-.9.5z"/></svg>';
 
 function renderHeader(){
@@ -722,7 +734,8 @@ function renderHoje(){
     <section class="pane p-viagem">
       <div class="card">
         <h2 class="eyebrow">Data da viagem</h2>
-        <div class="settings"><input type="date" id="viagem" value="${state.config.viagem||""}"><button class="btn" id="btnViagem">Salvar</button></div>
+        <div class="settings"><label for="viagem" class="sr">Data da viagem</label><input type="date" id="viagem" value="${state.config.viagem||""}"><button class="btn" id="btnViagem">Salvar</button></div>
+        <div class="saved">${state.config.viagem?`${CHECK_MINI} Salva: ${fmtData(state.config.viagem)}${(()=>{const f=daysBetween(HOJE,state.config.viagem);return f>0?` · faltam <b class="num">${f}</b> dias`:"";})()}`:"Escolha a data e ela fica salva sozinha."}</div>
       </div>
     </section>
 
@@ -732,6 +745,7 @@ function renderHoje(){
         <div class="weight"><input id="peso" inputmode="decimal" placeholder="80.0" value="${p.peso??""}"> <span>kg</span>
           <button class="btn" id="btnPeso">Salvar peso</button>
           <span class="avg">${media?`Média 7 dias: <b class="num">${media} kg</b>`:"Pese 3–4 vezes por semana"}</span></div>
+        <div class="saved">${p.peso?`${CHECK_MINI} Salvo hoje: <b class="num">${String(p.peso).replace(".",",")} kg</b>`:(()=>{const u=ultimoPeso();return u?`Último registro: <b class="num">${String(u.peso).replace(".",",")} kg</b> em ${fmtData(u.date)}. Digite o de hoje e ele salva sozinho.`:"Digite o peso e ele salva sozinho.";})()}</div>
       </div>
     </section>
     </div>`;
@@ -773,8 +787,16 @@ function bindHoje(p){
   document.querySelectorAll("[data-meal]").forEach(b=>b.onclick=()=>{ const s=b.dataset.meal; p.refeicoes[s].feito=!p.refeicoes[s].feito; commit(p); });
   document.querySelectorAll("[data-swap]").forEach(b=>b.onclick=()=>{ const s=b.dataset.swap; state.rerolls[s]=(state.rerolls[s]||0)+1; render(); });
   document.querySelectorAll(".seg [data-n]").forEach(b=>b.onclick=()=>{ const n=+b.dataset.n; if(n===nRefeicoes()) return; store.saveConfig({...state.config,nRefeicoes:n}); render(); toast(`${n} refeições por dia`); });
-  $("#btnPeso").onclick=()=>{ const v=parseFloat($("#peso").value.replace(",",".")); if(!(v>30&&v<250)){toast("Digite o peso em kg, ex.: 79.4");return;} p.peso=v; commit(p); toast("Peso salvo"); };
-  $("#btnViagem").onclick=()=>{ const v=$("#viagem").value; if(!v){toast("Escolha uma data");return;} store.saveConfig({...state.config,viagem:v}); render(); toast("Data da viagem salva"); };
+  const salvarPeso=(avisarErro)=>{ const raw=$("#peso").value.trim(); if(!raw) return; const v=parseFloat(raw.replace(",","."));
+    if(!(v>30&&v<250)){ if(avisarErro) toast("Digite o peso em kg, ex.: 79,4"); return; }
+    if(v===p.peso) return; p.peso=Math.round(v*10)/10; commit(p); toast("Peso salvo"); };
+  $("#btnPeso").onclick=()=>salvarPeso(true);
+  $("#peso").addEventListener("change",()=>salvarPeso(false));
+  $("#peso").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); salvarPeso(true); $("#peso").blur(); } });
+  const salvarViagem=(avisarErro)=>{ const v=$("#viagem").value; if(!v){ if(avisarErro) toast("Escolha uma data"); return; }
+    if(v===state.config.viagem) return; store.saveConfig({...state.config,viagem:v}); render(); toast("Data da viagem salva"); };
+  $("#btnViagem").onclick=()=>salvarViagem(true);
+  $("#viagem").addEventListener("change",()=>salvarViagem(false));
 }
 function commit(p){ const dia=montarDia(p); state.rerolls={}; state.treinoOverride=null; state.draft.cargas={}; store.saveDia(dia); render(); }
 
@@ -789,14 +811,44 @@ function renderHist(){
   }).join("");
   $("#viewHist").innerHTML=`<section class="card">
     <div class="row" style="justify-content:space-between"><h2 class="eyebrow">Últimos dias</h2><span class="eyebrow">${feitos} treinos nos últimos 7 dias</span></div>
-    <div class="hist">${rows||'<p class="empty">Nada registrado ainda. Marque o treino ou uma refeição na aba Hoje e o dia aparece aqui.</p>'}</div></section>`;
+    <div class="hist">${rows||'<p class="empty">Nada registrado ainda. Marque o treino ou uma refeição na aba Hoje e o dia aparece aqui.</p>'}</div></section>
+    ${store.mode==="local"?`<section class="card">
+      <h2 class="eyebrow">Backup dos seus registros</h2>
+      <p class="wfoco small" style="margin:0">Seus registros ficam guardados neste aparelho. Faça um backup de vez em quando e salve em Arquivos ou no iCloud. Se trocar de celular ou apagar o app, é só importar o arquivo.</p>
+      ${ehSafariSemIcone()?`<div class="note"><b>Você está no Safari.</b> No iPhone, o Safari e o ícone da tela de início guardam dados separados. Use sempre pelo ícone. Para levar o que salvou aqui, toque em "Salvar backup" e depois importe no app do ícone.</div>`:""}
+      ${store.falhou?`<div class="note"><b>O aparelho bloqueou o salvamento.</b> Isso acontece na navegação privada. Abra pelo ícone da tela de início, fora do modo privado.</div>`:""}
+      <div class="row"><button class="btn primary" id="btnExport">Salvar backup</button>
+        <label class="btn" for="fileImport" style="cursor:pointer">Importar backup</label><input type="file" id="fileImport" accept=".json,application/json" hidden></div>
+      <div class="saved">${(n=>n===1?"1 dia registrado":`${n} dias registrados`)(Object.keys(state.dias).length)}${state.config.viagem?` · viagem em ${fmtData(state.config.viagem)}`:""}</div>
+    </section>`:""}`;
+  bindHist();
+}
+function ehSafariSemIcone(){ return /iPhone|iPad|iPod/.test(navigator.userAgent) && !navigator.standalone && !matchMedia("(display-mode: standalone)").matches; }
+function bindHist(){
+  const ex=$("#btnExport"); if(!ex) return;
+  ex.onclick=async()=>{
+    const dados=JSON.stringify({app:"ontraining",versao:1,exportado:new Date().toISOString(),config:state.config,dias:state.dias},null,1);
+    const nome=`ontraining-backup-${HOJE}.json`, file=new File([dados],nome,{type:"application/json"});
+    try{ if(navigator.canShare?.({files:[file]})){ await navigator.share({files:[file],title:"Backup OnTraining"}); return; } }catch(e){ if(e.name==="AbortError") return; }
+    const a=document.createElement("a"); a.href=URL.createObjectURL(file); a.download=nome; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),4000); toast("Backup gerado");
+  };
+  $("#fileImport").onchange=async e=>{
+    const f=e.target.files[0]; if(!f) return;
+    try{ const d=JSON.parse(await f.text()); if(d.app!=="ontraining"||!d.dias) throw 0;
+      state.dias={...state.dias,...d.dias}; store.gravar("ont_dias",state.dias);
+      store.saveConfig({...d.config,...state.config,viagem:state.config.viagem||d.config?.viagem});
+      render(); toast(`Backup importado: ${(n=>n===1?"1 dia":n+" dias")(Object.keys(d.dias).length)}`);
+    }catch(err){ toast("Esse arquivo não é um backup do OnTraining."); }
+    e.target.value="";
+  };
 }
 function render(){
   renderHeader();
   if(state.tab==="hoje") renderHoje(); else renderHist();
   $("#viewHoje").hidden=state.tab!=="hoje"; $("#viewHist").hidden=state.tab!=="hist";
   $("#tabHoje").setAttribute("aria-selected",state.tab==="hoje"); $("#tabHist").setAttribute("aria-selected",state.tab==="hist");
-  $("#storeInfo").textContent = store.mode==="db" ? "Seus registros ficam salvos na sua conta e aparecem em qualquer aparelho." : "Registros salvos neste navegador.";
+  $("#storeInfo").textContent = store.mode==="db" ? "Seus registros ficam salvos na sua conta e aparecem em qualquer aparelho." : (ehSafariSemIcone()?"Registros salvos no Safari deste iPhone. O app do ícone guarda os dele separado.":"Registros salvos neste aparelho.");
 }
 $("#tabHoje").onclick=()=>{state.tab="hoje";render();};
 $("#tabHist").onclick=()=>{state.tab="hist";render();};

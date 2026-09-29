@@ -1,6 +1,6 @@
 // Service worker: guarda o app no aparelho para abrir sem internet.
 // Sempre tenta a versão nova primeiro; se estiver offline, usa a guardada.
-const CACHE = "ontraining-v1";
+const CACHE = "ontraining-v2";
 const ARQUIVOS = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-180.png", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", e => {
