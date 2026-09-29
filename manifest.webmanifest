@@ -1,0 +1,17 @@
+{
+  "name": "OnTraining Floripa",
+  "short_name": "OnTraining",
+  "description": "Treino e refeições do dia, com base no que você fez nos dias anteriores.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#EEF3F4",
+  "theme_color": "#0B7285",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -27,10 +27,21 @@ App pessoal de treino e dieta para chegar à viagem de Floripa com o corpo mais 
 | Gordura | ~150 g (animal) |
 | Carboidrato | 50–80 g |
 
-## Como usar
+## Instalar no iPhone
 
-- Abra o `index.html` no navegador do celular. Os registros ficam salvos no próprio navegador.
-- Para publicar no GitHub Pages: Settings → Pages → Branch `main` / pasta raiz. O app fica em `https://emanuel1811.github.io/ontraning/`.
+1. No GitHub: **Settings → Pages → Source: Deploy from a branch → Branch `main` / `(root)` → Save**.
+2. Depois de 1–2 minutos o app fica em `https://emanuel1811.github.io/ontraning/`.
+3. No iPhone, abra esse endereço no **Safari**, toque em **Compartilhar** (quadrado com seta) → **Adicionar à Tela de Início**.
+4. O ícone do OnTraining aparece na tela de início e abre em tela cheia, até sem internet.
+
+Os registros ficam salvos no próprio aparelho.
+
+## Arquivos
+
+- `index.html`: o app inteiro.
+- `manifest.webmanifest`: nome, cores e ícones do app instalado.
+- `sw.js`: guarda o app no aparelho para abrir sem internet.
+- `icons/`: ícones (180 px para iPhone, 192 e 512 px para Android).
 
 ## Personalizar
 

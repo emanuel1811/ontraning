@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0B7285">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="OnTraining">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
@@ -38,23 +45,17 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 .panes{display:grid;gap:14px}
 .pane{display:flex;flex-direction:column;gap:14px;min-width:0}
 .jump{display:none}
-@media (max-width:759px){
-  .panes{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;margin-inline:-16px;padding-inline:16px;scroll-padding-inline:16px;scrollbar-width:none;overscroll-behavior-x:contain}
-  .panes::-webkit-scrollbar{display:none}
-  .pane{flex:0 0 calc(100% - 22px);scroll-snap-align:start}
-  .jump{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
-  .jump button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:.82rem;font-weight:600;color:var(--muted);white-space:nowrap}
-  .jump button[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
-}
+@media (max-width:759px){.p-treino{order:1}.p-viagem{order:2}.p-ref{order:3}.p-peso{order:4}}
 @media (min-width:760px){
-  .panes{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);grid-template-rows:auto 1fr;align-items:start}
-  .pane.p-treino{grid-row:1 / span 2}
+  .panes{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch}
+  .pane > .card{flex:1}
+  .p-treino .card > .row:last-child{margin-top:auto}
   body header.top{flex-wrap:nowrap;align-items:center}
   body header.top > .tabs{flex:0 1 320px;order:0}
   body .date{font-size:2rem}
   body .date > small{display:inline;margin:0 8px 0 0}
 }
-@media (min-width:1000px){ .card .exlist{display:grid;grid-template-columns:1fr 1fr;column-gap:22px} .card .exlist .ex:nth-child(2){border-top:0} }
+
 h1,h2,h3{margin:0;text-wrap:balance}
 .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 button,input,select{font:inherit;color:inherit}
@@ -81,13 +82,24 @@ header.top .tabs{order:3;flex:1 1 100%}
 .note{background:var(--warn-soft);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:.88rem}
 .note b{color:var(--warn)}
 
-.exlist{display:flex;flex-direction:column}
-.ex{display:grid;grid-template-columns:1fr auto;gap:6px 12px;padding-block:11px;border-top:1px solid var(--line);align-items:center}
-.ex:first-child{border-top:0}
-.ex .n{font-weight:600;min-width:0}
-.ex .s{font-family:var(--f-mono);font-size:.8rem;color:var(--accent);margin-top:2px}
-.ex .load{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted);flex-wrap:wrap}
-.ex .load input{width:76px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-family:var(--f-mono);font-size:.85rem}
+/* Carrosséis de exercícios e refeições */
+.car-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.car-nav{display:flex;gap:6px}
+.arrow{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--surface);font-size:1.2rem;line-height:1;display:grid;place-items:center;padding:0 0 2px;color:var(--ink)}
+.carousel{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;margin-inline:-16px;padding-inline:16px;scroll-padding-inline:16px;padding-block:2px}
+.carousel::-webkit-scrollbar{display:none}
+.item{flex:0 0 min(78%,300px);scroll-snap-align:start;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.dots{display:flex;justify-content:center;gap:5px}
+.dots i{width:6px;height:6px;border-radius:3px;background:var(--line);transition:width .2s,background .2s}
+.dots i.on{width:16px;background:var(--accent)}
+@media (prefers-reduced-motion:reduce){.dots i{transition:none}}
+.ex-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ord{font-family:var(--f-display);font-weight:700;font-size:1.6rem;line-height:1;color:var(--accent)}
+.ex .n{font-weight:700;font-size:1rem;line-height:1.25;min-height:2.5em}
+.ex .s{font-family:var(--f-mono);font-size:.85rem;color:var(--ink)}
+.ex .load{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted);margin-top:auto;padding-top:4px}
+.ex .load input{width:76px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-family:var(--f-mono);font-size:.85rem}
+.ex .last{font-size:.78rem;color:var(--muted)}
 .demo{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:6px 11px 6px 8px;font-size:.8rem;font-weight:600;color:var(--accent);white-space:nowrap}
 .demo svg{width:14px;height:14px}
 
@@ -111,19 +123,20 @@ header.top .tabs{order:3;flex:1 1 100%}
 .bar{height:5px;border-radius:3px;background:var(--line);overflow:hidden}
 .bar i{display:block;height:100%;background:var(--accent)}
 
-.meal{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;padding-block:14px;border-top:1px solid var(--line)}
-.meal:first-child{border-top:0}
-.chk{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);background:transparent;display:grid;place-items:center;padding:0;margin-top:2px}
-.chk[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:var(--surface)}
-.chk svg{width:14px;height:14px}
+.meal .meal-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .meal .slot{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.meal .mt{font-weight:700;margin-top:2px}
-.meal ul{margin:4px 0 0;padding-left:18px;font-size:.9rem}
+.meal .kc{font-size:.8rem;color:var(--accent)}
+.meal .mt{font-weight:700;font-size:1rem}
+.meal ul{margin:0;padding-left:18px;font-size:.88rem}
 .meal li{margin-block:1px}
-.meal .mm{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);margin-top:6px}
+.meal .mm{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
+.meal-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto;padding-top:6px}
+.chkbtn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:7px 11px;font-size:.82rem;font-weight:600}
+.chkbtn[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:var(--surface)}
+.chkbtn svg{width:14px;height:14px}
 .swap{border:0;background:transparent;color:var(--accent);font-size:.82rem;font-weight:600;padding:4px 2px}
 .meal.eaten .mt,.meal.eaten ul{color:var(--muted)}
-
+.meal.eaten{border-color:var(--good)}
 .weight{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .weight input{width:96px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-family:var(--f-mono)}
 .weight .avg{font-size:.85rem;color:var(--muted)}
@@ -646,21 +659,27 @@ function renderHoje(){
   const chip=p.status==="feito"?'<span class="status done">Treino feito</span>':p.status==="pulado"?'<span class="status skip">Pulado</span>':'<span class="status todo">A fazer</span>';
   const exs=t.ex.map((e,i)=>{
     const nome=e[0][v%e[0].length], ant=ult?.cargas?.[i], val=state.draft.cargas[i]??state.dias[HOJE]?.treino?.cargas?.[i]??"";
-    const carga = e[2]||t.tipo!=="forca" ? "" : `<label class="load" for="kg${i}">Carga <input id="kg${i}" data-i="${i}" inputmode="decimal" placeholder="${ant?esc(ant):"kg"}" value="${esc(val)}"> kg ${ant?`<span>· última vez: <b class="num">${esc(ant)} kg</b></span>`:""}</label>`;
-    return `<div class="ex"><div style="min-width:0"><div class="n">${esc(nome)}</div><div class="s">${esc(e[1])}</div></div>
-      <button class="demo" data-demo="${esc(nome)}" data-sets="${esc(e[1])}">${PLAY}Execução</button>${carga}</div>`;
+    const carga = e[2]||t.tipo!=="forca" ? "" : `<label class="load" for="kg${i}">Carga <input id="kg${i}" data-i="${i}" inputmode="decimal" placeholder="${ant?esc(ant):"kg"}" value="${esc(val)}"> kg</label>${ant?`<div class="last">Última vez: <b class="num">${esc(ant)} kg</b></div>`:""}`;
+    return `<article class="item ex" aria-label="Exercício ${i+1} de ${t.ex.length}">
+      <div class="ex-top"><span class="ord num">${String(i+1).padStart(2,"0")}</span>
+        <button class="demo" data-demo="${esc(nome)}" data-sets="${esc(e[1])}">${PLAY}Execução</button></div>
+      <div class="n">${esc(nome)}</div><div class="s">${esc(e[1])}</div>${carga}</article>`;
   }).join("");
 
   const det=detalharRefeicoes(p), tot={k:0,p:0,g:0,c:0};
-  const meals=Object.entries(p.refeicoes).map(([slot,r])=>{
+  const nMeals=Object.keys(p.refeicoes).length;
+  const meals=Object.entries(p.refeicoes).map(([slot,r],i)=>{
     const m=det[slot]; for(const x in tot) tot[x]+=m.tot[x];
     const rotulo = slot==="lanche" ? (treinoDia?"Pré-treino":"Lanche") : REF[slot].nome;
-    return `<div class="meal ${r.feito?"eaten":""}">
-      <button class="chk" data-meal="${slot}" aria-pressed="${!!r.feito}" aria-label="Marcar ${rotulo} como feita">${r.feito?CHECK:""}</button>
-      <div style="min-width:0"><div class="slot">${rotulo} · <span class="num">${m.tot.k} kcal</span></div><div class="mt">${esc(m.titulo)}</div>
+    return `<article class="item meal ${r.feito?"eaten":""}" aria-label="${rotulo}, ${i+1} de ${nMeals}">
+      <div class="meal-top"><span class="slot">${rotulo}</span><span class="kc num">${m.tot.k} kcal</span></div>
+      <div class="mt">${esc(m.titulo)}</div>
       <ul>${m.itens.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
-      <div class="mm">P ${m.tot.p} g · G ${m.tot.g} g · C ${m.tot.c} g</div></div>
-      ${r.feito?"":`<button class="swap" data-swap="${slot}">Trocar</button>`}</div>`;
+      <div class="mm">P ${m.tot.p} g · G ${m.tot.g} g · C ${m.tot.c} g</div>
+      <div class="meal-actions">
+        <button class="chkbtn" data-meal="${slot}" aria-pressed="${!!r.feito}">${r.feito?CHECK+"Comi":"Marcar como feita"}</button>
+        ${r.feito?"":`<button class="swap" data-swap="${slot}">Trocar</button>`}
+      </div></article>`;
   }).join("");
   const mb=(lab,val,meta,un)=>`<div class="macro"><span>${lab}</span><b>${val}${un}</b><div class="bar"><i style="width:${Math.min(100,val/meta*100)}%"></i></div></div>`;
   const dicaHorario = nRefeicoes()===2
@@ -670,18 +689,15 @@ function renderHoje(){
   const pesos=Object.values(state.dias).filter(d=>d.peso&&daysBetween(d.date,HOJE)<7);
   const media=pesos.length?(pesos.reduce((s,d)=>s+d.peso,0)/pesos.length).toFixed(1):null;
 
-  const sc=$("#viewHoje .panes"), sl=sc?sc.scrollLeft:0;
+  const sc=$("#viewHoje .panes"), sl=sc?sc.scrollLeft:0, pos={}; document.querySelectorAll(".carousel").forEach(c=>pos[c.id]=c.scrollLeft);
   $("#viewHoje").innerHTML=`
     ${avisos().map(a=>`<div class="note">${a}</div>`).join("")}
-    <nav class="jump" aria-label="Ir para">
-      <button data-go="0">Treino</button><button data-go="1">Refeições</button><button data-go="2">Peso e viagem</button>
-    </nav>
     <div class="panes">
     <section class="pane p-treino"><div class="card" aria-labelledby="tTreino">
       <div class="row" style="justify-content:space-between;align-items:center"><span class="eyebrow">Treino de hoje</span>${chip}</div>
       <div><h2 class="wtitle" id="tTreino">${t.nome}</h2><div class="wfoco">${t.foco}${t.tipo==="forca"?` · variação ${v%2===0?"A":"B"}`:""}</div></div>
       ${p.motivo?`<div class="why">${esc(p.motivo)}</div>`:""}
-      <div class="exlist">${exs}</div>
+      ${carrossel("carEx","Exercícios de hoje",exs,t.ex.length)}
       ${t.tipo==="forca"?`<div class="wfoco small">Descanso de 60–90 s. Termine cada série com 1–2 repetições sobrando. Tente superar a carga ou as repetições da última vez.</div>`:""}
       <div class="row">
         <button class="btn primary grow" id="btnFeito">${p.status==="feito"?"Treino salvo ✓":"Treinei"}</button>
@@ -689,6 +705,7 @@ function renderHoje(){
         <button class="btn" id="btnTrocar">Trocar treino</button>
       </div>
     </div></section>
+
 
     <section class="pane p-ref"><div class="card" aria-labelledby="tRef">
       <div class="row" style="justify-content:space-between;align-items:center">
@@ -698,9 +715,16 @@ function renderHoje(){
         </div>
       </div>
       <div class="macros">${mb("kcal",tot.k,META.kcal,"")}${mb("Prot",tot.p,META.p," g")}${mb("Gord",tot.g,META.g," g")}${mb("Carb",tot.c,META.c," g")}</div>
-      <div>${meals}</div>
+      ${carrossel("carRef","Refeições de hoje",meals,nMeals)}
       <div class="wfoco small">${dicaHorario} Tudo low carb, sem glúten e com gordura só animal. As porções se ajustam para fechar ~${META.kcal} kcal, e o que você comeu nos últimos ${JANELA_REPETICAO} dias não se repete.</div>
     </div></section>
+
+    <section class="pane p-viagem">
+      <div class="card">
+        <h2 class="eyebrow">Data da viagem</h2>
+        <div class="settings"><input type="date" id="viagem" value="${state.config.viagem||""}"><button class="btn" id="btnViagem">Salvar</button></div>
+      </div>
+    </section>
 
     <section class="pane p-peso">
       <div class="card" aria-labelledby="tPeso">
@@ -709,17 +733,31 @@ function renderHoje(){
           <button class="btn" id="btnPeso">Salvar peso</button>
           <span class="avg">${media?`Média 7 dias: <b class="num">${media} kg</b>`:"Pese 3–4 vezes por semana"}</span></div>
       </div>
-      <div class="card">
-        <h2 class="eyebrow">Data da viagem</h2>
-        <div class="settings"><input type="date" id="viagem" value="${state.config.viagem||""}"><button class="btn" id="btnViagem">Salvar</button></div>
-      </div>
     </section>
     </div>`;
+  document.querySelectorAll(".carousel").forEach(c=>{ if(pos[c.id]) c.scrollLeft=pos[c.id]; atualizarCarrossel(c);
+    c.addEventListener("scroll",()=>{cancelAnimationFrame(c._r);c._r=requestAnimationFrame(()=>atualizarCarrossel(c));},{passive:true}); });
+  document.querySelectorAll("[data-car]").forEach(b=>b.onclick=()=>{ const c=document.getElementById(b.dataset.car), w=c.firstElementChild.offsetWidth+10;
+    c.scrollBy({left:w*(+b.dataset.dir),behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}); });
   const nsc=$("#viewHoje .panes"); nsc.scrollLeft=sl; marcarPane();
   nsc.addEventListener("scroll",()=>{cancelAnimationFrame(marcarPane._r);marcarPane._r=requestAnimationFrame(marcarPane);},{passive:true});
   document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ const pane=nsc.children[+b.dataset.go];
     nsc.scrollTo({left:pane.offsetLeft-nsc.offsetLeft-16,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}); });
   bindHoje(p);
+}
+function carrossel(id,label,itens,n){
+  return `<div class="car-head"><span class="eyebrow" id="${id}-cnt">1 de ${n}</span>
+    <div class="car-nav"><button class="arrow" data-car="${id}" data-dir="-1" aria-label="Anterior">‹</button><button class="arrow" data-car="${id}" data-dir="1" aria-label="Próximo">›</button></div></div>
+    <div class="carousel" id="${id}" role="region" aria-label="${label}" tabindex="0">${itens}</div>
+    <div class="dots" id="${id}-dots" aria-hidden="true">${Array.from({length:n},(_,i)=>`<i${i===0?' class="on"':""}></i>`).join("")}</div>`;
+}
+function atualizarCarrossel(el){
+  const items=[...el.children]; if(!items.length) return;
+  const x=el.scrollLeft; let idx=0,best=1e9;
+  items.forEach((it,i)=>{const d=Math.abs(it.offsetLeft-el.firstElementChild.offsetLeft-x); if(d<best){best=d;idx=i;}});
+  if(el.scrollLeft+el.clientWidth>=el.scrollWidth-4) idx=items.length-1;
+  const c=document.getElementById(el.id+"-cnt"); if(c) c.textContent=`${idx+1} de ${items.length}`;
+  document.querySelectorAll(`#${el.id}-dots i`).forEach((d,i)=>d.classList.toggle("on",i===idx));
 }
 function marcarPane(){
   const sc=$("#viewHoje .panes"); if(!sc) return; const w=sc.clientWidth||1;
@@ -770,5 +808,10 @@ render();
 store.init(render);
 </script>
 
+<script>
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+</script>
 </body>
 </html>
