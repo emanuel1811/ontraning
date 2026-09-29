@@ -10,7 +10,11 @@ App pessoal de treino e dieta para chegar à viagem de Floripa com o corpo mais 
   - Depois de 3 ou mais dias parado, ele pula o descanso e volta pelo Superior A.
   - Os exercícios alternam entre a variação A e B a cada vez que o treino é concluído.
   - Você anota a carga de cada exercício e o app mostra a da última vez.
-- **Refeições do dia**: low carb, sem glúten e com gordura só de origem animal. Refeições confirmadas nos últimos 3 dias não se repetem. Botão "Trocar" sorteia outra opção. Em dia de descanso não tem pré-treino.
+  - Botão **Execução** em cada exercício: abre um popup com um bonequinho animado fazendo o movimento, o passo a passo, o erro mais comum e um link para vídeos no YouTube.
+- **Refeições do dia**: 2 ou 3 por dia (você escolhe). Low carb, sem glúten e com gordura só de origem animal.
+  - As porções são calculadas: a carne/ovos ajustam para bater a proteína e manteiga/queijo/bacon ajustam para fechar as calorias.
+  - No modo 3, a refeição extra é um lanche, que vira pré-treino nos dias de treino.
+  - Refeições confirmadas nos últimos 3 dias não se repetem. Botão "Trocar" sorteia outra opção.
 - **Peso**: registro diário com média de 7 dias e aviso se o peso travar ou cair rápido demais.
 - **Contagem regressiva** até a data da viagem, com aviso de redução de volume na semana da viagem.
 
@@ -19,8 +23,8 @@ App pessoal de treino e dieta para chegar à viagem de Floripa com o corpo mais 
 | Item | Meta |
 |---|---|
 | Calorias | ~2.350 kcal |
-| Proteína | 150–160 g |
-| Gordura | 140–150 g (animal) |
+| Proteína | ~170 g |
+| Gordura | ~150 g (animal) |
 | Carboidrato | 50–80 g |
 
 ## Como usar
@@ -32,5 +36,7 @@ App pessoal de treino e dieta para chegar à viagem de Floripa com o corpo mais 
 
 Tudo fica no início do `<script>` do `index.html`:
 - `TREINOS`: exercícios, séries e variações.
-- `REFEICOES`: opções de cada refeição com kcal, proteína, gordura e carboidrato.
+- `ALIM`: tabela de alimentos (kcal e macros por grama ou unidade).
+- `REF`: opções de refeição e o papel de cada alimento (proteína, gordura ou fixo).
+- `PAD` e `DICAS`: animação e instruções de cada padrão de movimento.
 - `META`: metas diárias.
